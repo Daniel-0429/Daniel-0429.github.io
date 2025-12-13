@@ -1,0 +1,109 @@
+name: 同步文章（从Issues到JSON）
+on:
+  # 监听Issues的创建/编辑/打标签事件
+  issues:
+    types: [opened, edited, labeled]
+  # 允许手动触发工作流
+  workflow_dispatch:
+
+jobs:
+  sync-articles:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 拉取仓库代码
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      # 2. 安装jq（用于JSON解析，Ubuntu自带）
+      - name: 安装依赖工具
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # 3. 处理文章同步逻辑
+      - name: 同步文章数据
+        env:
+          # 传入GitHub事件数据
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_LABELS: ${{ toJSON(github.event.issue.labels) }}
+          ISSUE_ACTION: ${{ github.event.action }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          # 初始化articles.json（如果不存在）
+          if [ ! -f "data/articles.json" ]; then
+            mkdir -p data
+            echo '{"articles": [], "lastUpdate": ""}' > data/articles.json
+          fi
+
+          # ========== 处理「新增文章」 ==========
+          if [[ "$ISSUE_TITLE" == "新增文章" ]]; then
+            # 验证Issue正文是否为合法JSON
+            if echo "$ISSUE_BODY" | jq . > /dev/null 2>&1; then
+              # 读取现有文章
+              EXISTING=$(cat data/articles.json)
+              # 解析新文章数据
+              NEW_ARTICLE=$(echo "$ISSUE_BODY" | jq .)
+              # 合并到数组（去重+最新的放前面）
+              UPDATED=$(echo "$EXISTING" | jq \
+                --argjson new "$NEW_ARTICLE" \
+                '.articles = [$new] + (.articles | map(select(.id != $new.id))) | .lastUpdate = "'$(date -u +'%Y-%m-%dT%H:%M:%SZ')'"'
+              )
+              # 写入文件
+              echo "$UPDATED" > data/articles.json
+              echo "✅ 新增文章成功！"
+            else
+              echo "❌ Issue正文不是合法JSON，同步失败"
+              exit 1
+            fi
+          fi
+
+          # ========== 处理「编辑文章」 ==========
+          if [[ "$ISSUE_TITLE" == "编辑文章" ]]; then
+            if echo "$ISSUE_BODY" | jq . > /dev/null 2>&1; then
+              EXISTING=$(cat data/articles.json)
+              UPDATED_ARTICLE=$(echo "$ISSUE_BODY" | jq .)
+              ARTICLE_ID=$(echo "$UPDATED_ARTICLE" | jq -r '.id')
+              # 替换对应ID的文章
+              UPDATED=$(echo "$EXISTING" | jq \
+                --argjson updated "$UPDATED_ARTICLE" \
+                --arg id "$ARTICLE_ID" \
+                '.articles = (.articles | map(if .id == $id then $updated else . end)) | .lastUpdate = "'$(date -u +'%Y-%m-%dT%H:%M:%SZ')'"'
+              )
+              echo "$UPDATED" > data/articles.json
+              echo "✅ 编辑文章成功！"
+            else
+              echo "❌ Issue正文不是合法JSON，同步失败"
+              exit 1
+            fi
+          fi
+
+          # ========== 处理「删除文章」 ==========
+          if [[ "$ISSUE_ACTION" == "labeled" ]]; then
+            # 提取标签（格式：delete-article-<ID>）
+            LABEL_NAME=$(echo "$ISSUE_LABELS" | jq -r '.[0].name')
+            if [[ "$LABEL_NAME" =~ ^delete-article- ]]; then
+              ARTICLE_ID=${LABEL_NAME#delete-article-}
+              EXISTING=$(cat data/articles.json)
+              # 过滤掉要删除的文章
+              UPDATED=$(echo "$EXISTING" | jq \
+                --arg id "$ARTICLE_ID" \
+                '.articles = (.articles | map(select(.id != $id))) | .lastUpdate = "'$(date -u +'%Y-%m-%dT%H:%M:%SZ')'"'
+              )
+              echo "$UPDATED" > data/articles.json
+              echo "✅ 删除文章ID:$ARTICLE_ID 成功！"
+            fi
+          fi
+
+      # 4. 提交并推送修改到仓库
+      - name: 提交修改
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          # 检查是否有修改
+          if git status --porcelain | grep -q "data/articles.json"; then
+            git add data/articles.json
+            git commit -m "🔄 同步文章（来自Issue #$ISSUE_NUMBER）"
+            git push
+            echo "✅ 推送修改到仓库成功！"
+          else
+            echo "ℹ️ 无文章数据修改，无需推送"
+          fi

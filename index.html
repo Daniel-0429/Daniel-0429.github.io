@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel-0429 - 个人首页</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">Daniel-0429</div>
+            <ul class="nav-links">
+                <li><a href="#about">关于我</a></li>
+                <li><a href="#skills">技能</a></li>
+                <li><a href="#projects">项目</a></li>
+                <li><a href="#articles">文章</a></li>
+                <li><a href="#contact">联系我</a></li>
+                <li><a href="admin.html" class="admin-link">文章编辑</a></li>
+            </ul>
+            <div class="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区（保留你原有代码） -->
+    <header class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>你好，我是<span>Daniel-0429</span></h1>
+                <p>一名热爱编程的开发者 / 设计师 / 学生</p>
+                <a href="#contact" class="btn">联系我</a>
+            </div>
+            <div class="hero-img">
+                <img src="assets/avatar.jpg" alt="头像">
+            </div>
+        </div>
+    </header>
+
+    <!-- 关于我（保留你原有代码） -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">关于我</h2>
+            <div class="about-content">
+                <p>欢迎来到我的个人主页！我是一名专注于前端/后端/全栈开发的工程师，拥有X年开发经验。熟悉HTML/CSS/JavaScript/React/Vue等技术栈，热爱开源和技术分享。</p>
+                <p>除了编程，我还喜欢阅读、旅行、摄影，始终保持对新技术的学习热情。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技能（保留你原有代码） -->
+    <section id="skills" class="skills">
+        <div class="container">
+            <h2 class="section-title">我的技能</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <i class="fas fa-code"></i>
+                    <h3>前端开发</h3>
+                    <p>HTML5/CSS3/JavaScript、React、Vue、TailwindCSS</p>
+                </div>
+                <div class="skill-card">
+                    <i class="fas fa-server"></i>
+                    <h3>后端开发</h3>
+                    <p>Node.js、Python、Java、MySQL、MongoDB</p>
+                </div>
+                <div class="skill-card">
+                    <i class="fas fa-tools"></i>
+                    <h3>工具&其他</h3>
+                    <p>Git、Docker、Linux、Figma、CI/CD</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 项目（保留你原有代码） -->
+    <section id="projects" class="projects">
+        <div class="container">
+            <h2 class="section-title">我的项目</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3>项目名称1</h3>
+                    <p>项目简短描述，使用了哪些技术栈，解决了什么问题</p>
+                    <a href="https://github.com/你的用户名/项目名" target="_blank" class="project-link">
+                        <i class="fab fa-github"></i> 查看源码
+                    </a>
+                </div>
+                <div class="project-card">
+                    <h3>项目名称2</h3>
+                    <p>项目简短描述，使用了哪些技术栈，解决了什么问题</p>
+                    <a href="https://github.com/你的用户名/项目名" target="_blank" class="project-link">
+                        <i class="fab fa-github"></i> 查看源码
+                    </a>
+                </div>
+                <div class="project-card">
+                    <h3>项目名称3</h3>
+                    <p>项目简短描述，使用了哪些技术栈，解决了什么问题</p>
+                    <a href="https://github.com/你的用户名/项目名" target="_blank" class="project-link">
+                        <i class="fab fa-github"></i> 查看源码
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 文章板块（核心） -->
+    <section id="articles" class="articles">
+        <div class="container">
+            <h2 class="section-title">我的文章</h2>
+            <div class="article-search">
+                <input type="text" id="search-input" placeholder="搜索文章标题...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="articles-grid" id="articles-list">
+                <div class="loading">加载最新文章中...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我（保留你原有代码） -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">联系我</h2>
+            <div class="contact-links">
+                <a href="mailto:daniel0429@petalmail.com" target="_blank">
+                    <i class="fas fa-envelope"></i> daniel0429@petalmail.com
+                </a>
+                <a href="https://github.com/你的用户名" target="_blank">
+                    <i class="fab fa-github"></i> github.com/你的用户名
+                </a>
+                <a href="https://linkedin.com/in/你的用户名" target="_blank">
+                    <i class="fab fa-linkedin"></i> linkedin.com/in/你的用户名
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Daniel-0429 - 个人首页 | 基于GitHub Pages部署</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

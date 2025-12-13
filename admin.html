@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章编辑工具</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">文章编辑工具</div>
+            <ul class="nav-links">
+                <li><a href="index.html">返回首页</a></li>
+                <li><a href="https://github.com/Daniel-0429/Daniel-0429.github.io/issues" target="_blank">仓库Issues</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="admin-section">
+        <div class="container">
+            <!-- 登录验证（简单密码） -->
+            <div class="login-form" id="login-form">
+                <h3>编辑工具登录</h3>
+                <input type="password" id="admin-pwd" placeholder="输入管理密码">
+                <button id="login-btn">登录</button>
+            </div>
+
+            <!-- 文章编辑面板 -->
+            <div class="admin-panel" id="admin-panel" style="display: none;">
+                <div class="article-form">
+                    <h3>新增/编辑文章</h3>
+                    <input type="hidden" id="article-id">
+                    <div class="form-group">
+                        <label>标题</label>
+                        <input type="text" id="article-title" placeholder="文章标题">
+                    </div>
+                    <div class="form-group">
+                        <label>摘要</label>
+                        <textarea id="article-desc" placeholder="文章摘要（简短描述）"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>内容（支持Markdown）</label>
+                        <textarea id="article-content" rows="10" placeholder="文章内容"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>标签（用逗号分隔）</label>
+                        <input type="text" id="article-tags" placeholder="例如：前端,JavaScript,React">
+                    </div>
+                    <button id="generate-json">生成JSON</button>
+                    <button id="clear-form" style="margin-left: 10px;">清空表单</button>
+                </div>
+
+                <!-- JSON预览区 -->
+                <div class="json-preview">
+                    <h3>文章JSON预览（复制到GitHub Issue）</h3>
+                    <textarea id="json-output" rows="8" readonly></textarea>
+                    <button id="copy-json">复制JSON</button>
+                    <div class="tips">
+                        <p>📌 操作指引：</p>
+                        <p>1. 填写表单后点击「生成JSON」</p>
+                        <p>2. 复制JSON到仓库Issues，创建标题为「新增文章」的Issue（编辑则标题为「编辑文章」）</p>
+                        <p>3. 删除文章：给任意Issue添加标签 <code>delete-article-文章ID</code></p>
+                    </div>
+                </div>
+
+                <!-- 现有文章列表 -->
+                <div class="admin-articles">
+                    <h3>现有文章（点击复制ID）</h3>
+                    <div id="admin-articles-list">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const ADMIN_PASSWORD = "admin123";
+        const ISSUES_URL = "https://github.com/Daniel-0429/Daniel-0429.github.io/issues";
+
+        // DOM元素
+        const loginForm = document.getElementById('login-form');
+        const adminPanel = document.getElementById('admin-panel');
+        const loginBtn = document.getElementById('login-btn');
+        const adminPwd = document.getElementById('admin-pwd');
+        const generateJsonBtn = document.getElementById('generate-json');
+        const clearFormBtn = document.getElementById('clear-form');
+        const jsonOutput = document.getElementById('json-output');
+        const copyJsonBtn = document.getElementById('copy-json');
+        const articleId = document.getElementById('article-id');
+        const articleTitle = document.getElementById('article-title');
+        const articleDesc = document.getElementById('article-desc');
+        const articleContent = document.getElementById('article-content');
+        const articleTags = document.getElementById('article-tags');
+        const adminArticlesList = document.getElementById('admin-articles-list');
+
+        // 登录验证
+        loginBtn.addEventListener('click', () => {
+            if (adminPwd.value === ADMIN_PASSWORD) {
+                loginForm.style.display = 'none';
+                adminPanel.style.display = 'block';
+                loadArticles(); // 加载现有文章
+            } else {
+                alert('密码错误！');
+            }
+        });
+
+        // 加载现有文章
+        async function loadArticles() {
+            try {
+                // 直接读取GitHub Pages上的articles.json（无Token）
+                const response = await fetch(`./data/articles.json?t=${Date.now()}`, { cache: 'no-cache' });
+                const data = await response.json();
+                const articles = data.articles || [];
+
+                if (articles.length === 0) {
+                    adminArticlesList.innerHTML = '<p>暂无文章</p>';
+                    return;
+                }
+
+                // 渲染文章列表（点击复制ID）
+                adminArticlesList.innerHTML = articles.map(art => `
+                    <div class="admin-article-item">
+                        <h4>${art.title}</h4>
+                        <div>
+                            <span class="article-id" onclick="copyText('${art.id}')">ID: ${art.id}</span>
+                            <button onclick="fillForm('${art.id}')">填充到表单</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                adminArticlesList.innerHTML = `<p>加载失败：${err.message}</p>`;
+            }
+        }
+
+        // 生成文章JSON
+        generateJsonBtn.addEventListener('click', () => {
+            const id = articleId.value || Date.now().toString();
+            const title = articleTitle.value.trim();
+            const desc = articleDesc.value.trim();
+            const content = articleContent.value.trim();
+            const tags = articleTags.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+
+            if (!title || !content) {
+                alert('标题和内容不能为空！');
+                return;
+            }
+
+            // 构造文章数据
+            const articleData = {
+                id: id,
+                title: title,
+                desc: desc,
+                content: content,
+                tags: tags,
+                createTime: articleId.value ? undefined : new Date().toISOString(),
+                updateTime: articleId.value ? new Date().toISOString() : undefined
+            };
+
+            // 格式化JSON（美观易读）
+            const jsonStr = JSON.stringify(articleData, null, 2);
+            jsonOutput.value = jsonStr;
+        });
+
+        // 清空表单
+        clearFormBtn.addEventListener('click', () => {
+            articleId.value = '';
+            articleTitle.value = '';
+            articleDesc.value = '';
+            articleContent.value = '';
+            articleTags.value = '';
+            jsonOutput.value = '';
+        });
+
+        // 复制JSON
+        copyJsonBtn.addEventListener('click', async () => {
+            if (!jsonOutput.value) {
+                alert('暂无JSON可复制！');
+                return;
+            }
+            await navigator.clipboard.writeText(jsonOutput.value);
+            alert('JSON复制成功！请前往Issues粘贴');
+            // 自动打开Issues页面
+            window.open(ISSUES_URL, '_blank');
+        });
+
+        // 填充表单（编辑文章）
+        window.fillForm = async function(id) {
+            const response = await fetch(`./data/articles.json?t=${Date.now()}`, { cache: 'no-cache' });
+            const data = await response.json();
+            const article = data.articles.find(art => art.id === id);
+            if (!article) return;
+
+            articleId.value = article.id;
+            articleTitle.value = article.title;
+            articleDesc.value = article.desc;
+            articleContent.value = article.content;
+            articleTags.value = article.tags.join(',');
+            // 生成编辑用的JSON
+            generateJsonBtn.click();
+        };
+
+        // 复制文本（如文章ID）
+        window.copyText = async function(text) {
+            await navigator.clipboard.writeText(text);
+            alert(`已复制：${text}`);
+        };
+    </script>
+</body>
+</html>

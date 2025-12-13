@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章详情</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">文章详情</div>
+            <ul class="nav-links">
+                <li><a href="index.html">返回首页</a></li>
+                <li><a href="admin.html">文章编辑</a></li>
+            </ul>
+            <div class="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <section class="article-detail">
+        <div class="container">
+            <div id="article-detail-content" class="loading">加载文章中...</div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 你的名字 - 个人首页</p>
+        </div>
+    </footer>
+
+    <script>
+        // 加载文章详情
+        async function loadArticleDetail() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+
+            if (!articleId) {
+                document.getElementById('article-detail-content').innerHTML = '<p class="error">无效的文章ID</p>';
+                return;
+            }
+
+            try {
+                // 读取最新的文章数据
+                const response = await fetch(`./data/articles.json?t=${Date.now()}`, { cache: 'no-cache' });
+                const data = await response.json();
+                const article = data.articles.find(art => art.id === articleId);
+
+                if (!article) {
+                    document.getElementById('article-detail-content').innerHTML = '<p class="error">文章不存在</p>';
+                    return;
+                }
+
+                // 渲染Markdown内容
+                const contentHtml = marked.parse(article.content);
+                // 格式化时间
+                const createTime = article.createTime ? new Date(article.createTime).toLocaleString() : '';
+                const updateTime = article.updateTime ? new Date(article.updateTime).toLocaleString() : createTime;
+
+                // 拼接HTML
+                document.getElementById('article-detail-content').innerHTML = `
+                    <div class="article-header">
+                        <h1>${article.title}</h1>
+                        <div class="article-meta">
+                            <span><i class="fas fa-calendar"></i> 创建时间：${createTime}</span>
+                            ${article.updateTime ? `<span><i class="fas fa-edit"></i> 更新时间：${updateTime}</span>` : ''}
+                            <div class="article-tags">
+                                ${article.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="article-summary">${article.desc}</div>
+                    <div class="article-content">${contentHtml}</div>
+                `;
+            } catch (err) {
+                document.getElementById('article-detail-content').innerHTML = `<p class="error">加载失败：${err.message}</p>`;
+            }
+        }
+
+        // 初始化
+        loadArticleDetail();
+    </script>
+</body>
+</html>
