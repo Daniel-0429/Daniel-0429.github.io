@@ -148,21 +148,21 @@
                 // 核心：用Showdown把Markdown转HTML（替换原来的marked.parse）
                 const contentHtml = converter.makeHtml(article.content);
                 
-                // 拼接完整HTML（注意容器id是article-content）
-                document.getElementById('article-detail-content').innerHTML = `
-                    <div class="article-header">
-                        <h1>${article.title}</h1>
-                        <div class="article-meta">
-                            <span><i class="fas fa-calendar"></i> 创建时间：${createTime}</span>
-                            ${article.updateTime ? `<span><i class="fas fa-edit"></i> 更新时间：${updateTime}</span>` : ''}
-                            <div class="article-tags">
-                                ${article.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="article-summary">${article.desc}</div>
-                    <div class="article-content" id="article-content">${contentHtml}</div>
-                `;
+               // 拼接完整HTML（加全字段容错）
+document.getElementById('article-detail-content').innerHTML = `
+    <div class="article-header">
+        <h1>${article.title || '无标题'}</h1>
+        <div class="article-meta">
+            <span><i class="fas fa-calendar"></i> 创建时间：${createTime || '未知'}</span>
+            ${article.updateTime ? `<span><i class="fas fa-edit"></i> 更新时间：${updateTime}</span>` : ''}
+            <div class="article-tags">
+                ${(article.tags && Array.isArray(article.tags)) ? article.tags.map(tag => `<span class="tag">${tag || ''}</span>`).join('') : ''}
+            </div>
+        </div>
+    </div>
+    <div class="article-summary">${article.desc || '无摘要'}</div>
+    <div class="article-content" id="article-content">${contentHtml || '无内容'}</div>
+`;
 
                 // 关键：HTML渲染完成后，激活高亮和公式
                 setTimeout(() => {
