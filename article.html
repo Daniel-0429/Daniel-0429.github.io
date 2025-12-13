@@ -15,6 +15,12 @@
             <ul class="nav-links">
                 <li><a href="index.html">返回首页</a></li>
                 <li><a href="admin.html">文章编辑</a></li>
+		<!-- 新增：暗色模式切换按钮 -->
+<li>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换暗色模式">
+        <i class="fas fa-moon"></i>
+    </button>
+</li>
             </ul>
             <div class="hamburger">
                 <i class="fas fa-bars"></i>
@@ -85,5 +91,58 @@
         // 初始化
         loadArticleDetail();
     </script>
+    <!-- 暗色模式切换脚本 -->
+<script>
+    // 初始化主题
+    const initTheme = () => {
+        // 优先读取本地存储的主题
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        } else if (prefersDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        
+        // 更新按钮图标
+        updateThemeIcon();
+    };
+
+    // 更新切换按钮图标
+    const updateThemeIcon = () => {
+        const toggleBtn = document.getElementById('themeToggle');
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        toggleBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    };
+
+    // 切换主题
+    const toggleTheme = () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme); // 保存到本地存储
+        updateThemeIcon();
+    };
+
+    // 初始化
+    initTheme();
+
+    // 绑定切换事件
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+    // 监听系统主题变化
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) { // 仅当用户未手动切换时，跟随系统
+            const newTheme = e.matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            updateThemeIcon();
+        }
+    });
+</script>
+
+<!-- 引入Font Awesome图标（确保图标显示） -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
