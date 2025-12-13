@@ -1004,12 +1004,15 @@ section {
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
     transition: var(--transition);
+    max-width: 900px; /* 限制宽度，避免行太长 */
+    margin: 0 auto;
 }
 
 .article-header {
     margin-bottom: 3rem;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 2rem;
+    text-align: left !important; /* 标题左对齐 */
 }
 
 .article-header h1 {
@@ -1021,6 +1024,7 @@ section {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    text-align: left !important;
 }
 
 .article-meta {
@@ -1030,16 +1034,7 @@ section {
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
     font-size: 1rem;
-}
-
-.article-meta span {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.article-meta i {
-    color: var(--primary);
+    text-align: left !important;
 }
 
 .article-summary {
@@ -1051,63 +1046,83 @@ section {
     border-radius: var(--radius-lg);
     border-left: 4px solid var(--primary);
     line-height: 1.8;
+    text-align: left !important;
 }
 
+/* 核心：文章内容左对齐+规范排版 */
 .article-content {
     line-height: 1.8;
     font-size: 1.1rem;
     color: var(--text-primary);
+    text-align: left !important; /* 强制左对齐 */
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-.article-content h2, .article-content h3 {
-    margin: 2.5rem 0 1.5rem;
-    color: var(--secondary);
-    font-weight: 700;
-}
-
+/* 标题层级规范 */
 .article-content h2 {
     font-size: 1.8rem;
+    margin: 3rem 0 1.5rem;
+    color: var(--secondary);
+    font-weight: 700;
     padding-bottom: 0.8rem;
     border-bottom: 1px solid var(--border-color);
+    text-align: left !important;
 }
 
 .article-content h3 {
     font-size: 1.4rem;
+    margin: 2.5rem 0 1rem;
     color: var(--primary);
+    font-weight: 600;
+    text-align: left !important;
 }
 
+.article-content h4 {
+    font-size: 1.2rem;
+    margin: 2rem 0 0.8rem;
+    color: var(--secondary);
+    font-weight: 600;
+}
+
+/* 段落间距 */
 .article-content p {
-    margin-bottom: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: left !important;
+    text-indent: 2em; /* 可选：首行缩进2字符，符合中文阅读习惯 */
 }
 
-.article-content code {
-    background-color: rgba(99, 102, 241, 0.05);
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
-    font-family: 'Fira Code', monospace;
+/* 列表样式 */
+.article-content ul, .article-content ol {
+    margin: 1.5rem 0 1.5rem 2rem;
+    padding-left: 1rem;
+}
+
+.article-content li {
+    margin-bottom: 0.8rem;
+    text-align: left !important;
+}
+
+/* 链接样式 */
+.article-content a {
+    color: var(--primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--primary-light);
+    transition: var(--transition);
+}
+
+.article-content a:hover {
     color: var(--primary-dark);
+    border-bottom-color: var(--primary-dark);
 }
 
-.article-content pre {
-    background-color: var(--secondary);
-    color: var(--text-primary);
-    padding: 1.5rem;
-    border-radius: var(--radius-md);
-    overflow-x: auto;
-    margin-bottom: 1.8rem;
-    font-family: 'Fira Code', monospace;
-}
-
-.article-content pre code {
-    background: transparent;
-    color: var(--text-primary);
-    padding: 0;
-}
-
+/* 图片排版 */
 .article-content img {
     max-width: 100%;
     border-radius: var(--radius-md);
-    margin: 2rem 0;
+    margin: 2rem auto; /* 图片单独居中，内容左对齐 */
+    display: block; /* 避免图片和文字混排 */
     box-shadow: var(--shadow-md);
     transition: var(--transition);
 }
@@ -1116,16 +1131,6 @@ section {
     transform: scale(1.02);
     box-shadow: var(--shadow-lg);
 }
-
-.article-content ul, .article-content ol {
-    margin-bottom: 1.8rem;
-    padding-left: 2rem;
-}
-
-.article-content li {
-    margin-bottom: 0.8rem;
-}
-
 /* 响应式适配（移动端优化） */
 @media (max-width: 768px) {
     .hamburger {
@@ -1199,4 +1204,51 @@ section {
         margin-right: 0;
         width: 100%;
     }
+/* 代码块样式适配 */
+.article-content pre {
+    background-color: #1a1a1a !important; /* 暗色代码块背景 */
+    color: #fff !important;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* 暗色模式下的代码块适配 */
+[data-theme="dark"] .article-content pre {
+    background-color: #0f0f0f !important;
+}
+
+/* 行内代码 */
+.article-content code {
+    background-color: rgba(99, 102, 241, 0.1) !important;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    color: var(--primary-dark) !important;
+    font-size: 0.95rem;
+}
+
+[data-theme="dark"] .article-content code {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+    color: var(--primary-light) !important;
+}
+
+/* 修复Prism.js的行号样式（可选） */
+pre[class*="language-"] {
+    position: relative;
+    overflow: auto;
+}
+
+/* 禁止代码块换行，保留横向滚动 */
+.article-content pre code {
+    white-space: pre;
+    word-break: normal;
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+}
 }
