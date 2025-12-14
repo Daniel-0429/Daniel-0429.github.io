@@ -3,24 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daniel-0429 - 个人首页</title>
+    <title>Daniel - 个人首页</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 新增：调整导航栏毛玻璃为更通透的效果 */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            /* 更通透的毛玻璃：降低背景不透明度 + 减小模糊度 */
+            background: rgba(255, 255, 255, 0.6) !important; /* 浅色模式更透 */
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* 暗色模式下的通透毛玻璃 */
+        [data-theme="dark"] .navbar {
+            background: rgba(28, 28, 30, 0.6) !important; /* 深色模式更透 */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* 移动端导航栏也同步通透效果 */
+        .nav-links {
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+        }
+
+        [data-theme="dark"] .nav-links {
+            background: rgba(28, 28, 30, 0.8) !important;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <div class="logo">Daniel-0429</div>
+            <div class="logo">Daniel</div>
             <ul class="nav-links">
                 <li><a href="#about">关于我</a></li>
                 <li><a href="#projects">项目</a></li>
                 <li><a href="#articles">文章</a></li>
                 <li><a href="#contact">联系我</a></li>
                 <li><a href="admin.html" class="admin-link">文章编辑</a></li>
-		<li><button class="theme-toggle" id="themeToggle" aria-label="切换暗色模式">
-        <i class="fas fa-moon"></i>
-    </button>
-</li>
+                <li>
+                    <button class="theme-toggle" id="themeToggle" aria-label="切换暗色模式">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
             </ul>
             <div class="hamburger">
                 <i class="fas fa-bars"></i>
@@ -28,12 +59,11 @@
         </div>
     </nav>
 
-    <!-- 英雄区（保留你原有代码） -->
+    <!-- 英雄区 -->
     <header class="hero">
         <div class="container">
             <div class="hero-content">
-                <h1>你好，我是<span>Daniel-0429</span></h1>
-                <p>一名热爱编程的学生</p>
+                <h1>你好，我是<span>Daniel</span></h1>
                 <a href="#contact" class="btn">联系我</a>
             </div>
             <div class="hero-img">
@@ -42,17 +72,17 @@
         </div>
     </header>
 
-    <!-- 关于我（保留你原有代码） -->
+    <!-- 关于我 -->
     <section id="about" class="about">
         <div class="container">
             <h2 class="section-title">关于我</h2>
             <div class="about-content">
-                <p>欢迎来到我的个人主页！</p>
+                <p>欢迎来到我的个人主页！我是一名热爱编程的小学牲，主要专注于 C++ 编程语言和系统开发。</p>
             </div>
         </div>
     </section>
 
-    <!-- 项目（保留你原有代码） -->
+    <!-- 项目（GitHub链接保留Daniel-0429） -->
     <section id="projects" class="projects">
         <div class="container">
             <h2 class="section-title">我的项目</h2>
@@ -75,7 +105,7 @@
         </div>
     </section>
 
-    <!-- 文章板块（核心） -->
+    <!-- 文章板块 -->
     <section id="articles" class="articles">
         <div class="container">
             <h2 class="section-title">我的文章</h2>
@@ -89,7 +119,7 @@
         </div>
     </section>
 
-    <!-- 联系我（保留你原有代码） -->
+    <!-- 联系我（GitHub链接保留Daniel-0429，邮箱可根据需求改，这里先保留） -->
     <section id="contact" class="contact">
         <div class="container">
             <h2 class="section-title">联系我</h2>
@@ -99,69 +129,79 @@
                 </a>
                 <a href="https://github.com/Daniel-0429" target="_blank">
                     <i class="fab fa-github"></i> github.com/Daniel-0429
+                </a>
             </div>
         </div>
     </section>
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 Daniel-0429 - 个人首页 | 基于GitHub Pages部署</p>
+            <p>&copy; 2025 Daniel - 个人首页 | 基于GitHub Pages部署</p>
         </div>
     </footer>
 
     <script src="script.js"></script>
     <!-- 暗色模式切换脚本 -->
-<script>
-    // 初始化主题
-    const initTheme = () => {
-        // 优先读取本地存储的主题
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        } else if (prefersDark) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
-        
-        // 更新按钮图标
-        updateThemeIcon();
-    };
-
-    // 更新切换按钮图标
-    const updateThemeIcon = () => {
-        const toggleBtn = document.getElementById('themeToggle');
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        toggleBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    };
-
-    // 切换主题
-    const toggleTheme = () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme); // 保存到本地存储
-        updateThemeIcon();
-    };
-
-    // 初始化
-    initTheme();
-
-    // 绑定切换事件
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
-    // 监听系统主题变化
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (!localStorage.getItem('theme')) { // 仅当用户未手动切换时，跟随系统
-            const newTheme = e.matches ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
+    <script>
+        // 初始化主题
+        const initTheme = () => {
+            // 优先读取本地存储的主题
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (prefersDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+            
+            // 更新按钮图标
             updateThemeIcon();
-        }
-    });
-</script>
+        };
 
-<!-- 引入Font Awesome图标（确保图标显示） -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        // 更新切换按钮图标
+        const updateThemeIcon = () => {
+            const toggleBtn = document.getElementById('themeToggle');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            toggleBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        };
+
+        // 切换主题
+        const toggleTheme = () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme); // 保存到本地存储
+            updateThemeIcon();
+        };
+
+        // 初始化
+        initTheme();
+
+        // 绑定切换事件
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+        // 监听系统主题变化
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) { // 仅当用户未手动切换时，跟随系统
+                const newTheme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                updateThemeIcon();
+            }
+        });
+
+        // 移动端导航栏切换（补充原代码缺失的逻辑）
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        if (hamburger && navLinks) {
+            hamburger.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        }
+    </script>
+
+    <!-- 引入Font Awesome图标（确保图标显示） -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
