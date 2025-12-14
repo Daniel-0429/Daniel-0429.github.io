@@ -4,23 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文章详情</title>
-    <!-- 样式先加载 -->
+    <!-- 基础样式 -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Prism.js 代码高亮（样式+核心） -->
+    <!-- Prism.js 代码高亮（核心样式+脚本） -->
     <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
-    <!-- 支持更多语言 -->
+    <!-- 支持C++/Python/JS/HTML/CSS高亮 -->
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-html.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-css.min.js"></script>
     
-    <!-- MathJax 公式渲染 -->
+    <!-- MathJax 数学公式渲染 -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>
+        // 配置MathJax（支持$公式$和$$公式$$）
         MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -33,10 +34,11 @@
         };
     </script>
     
-    <!-- Showdown.js Markdown转HTML -->
+    <!-- Showdown.js Markdown转HTML（仅基础版，无多余扩展） -->
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
 </head>
 <body>
+    <!-- 导航栏 -->
     <nav class="navbar">
         <div class="container">
             <div class="logo">文章详情</div>
@@ -56,21 +58,25 @@
         </div>
     </nav>
 
+    <!-- 文章详情容器 -->
     <section class="article-detail">
         <div class="container">
             <div id="article-detail-content" class="loading">加载文章中...</div>
         </div>
     </section>
 
+    <!-- 页脚 -->
     <footer class="footer">
         <div class="container">
             <p>&copy; 2025 Daniel-0429 - 个人首页</p>
         </div>
     </footer>
 
+    <!-- 核心脚本（暗色模式+文章加载） -->
     <script>
-        // ========== 1. 暗色模式脚本 ==========
-        const initTheme = () => {
+        // ===================== 1. 暗色模式逻辑（极简版） =====================
+        function initTheme() {
+            // 读取本地存储的主题，没有则跟随系统
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             
@@ -80,62 +86,57 @@
                 document.documentElement.setAttribute('data-theme', 'dark');
             }
             updateThemeIcon();
-        };
+        }
 
-        const updateThemeIcon = () => {
+        function updateThemeIcon() {
             const toggleBtn = document.getElementById('themeToggle');
-            if (!toggleBtn) return; // 容错：按钮不存在
+            if (!toggleBtn) return;
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             toggleBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        };
+        }
 
-        const toggleTheme = () => {
+        function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon();
-        };
+        }
 
-        // ========== 2. 文章详情加载核心逻辑 ==========
+        // ===================== 2. 文章加载核心逻辑（极简+全容错） =====================
         async function loadArticleDetail() {
-            // 第一步：获取容器+URL参数（先容错）
-            const contentContainer = document.getElementById('article-detail-content');
-            if (!contentContainer) {
-                console.error('文章容器未找到');
-                return;
-            }
+            // 获取文章容器（先判断是否存在）
+            const contentBox = document.getElementById('article-detail-content');
+            if (!contentBox) return;
 
+            // 获取URL中的文章ID
             const urlParams = new URLSearchParams(window.location.search);
             const articleId = urlParams.get('id');
 
-            // 容错：无文章ID
+            // 无ID则提示
             if (!articleId) {
-                contentContainer.innerHTML = '<p class="error">无效的文章ID</p>';
+                contentBox.innerHTML = '<p class="error">无效的文章ID</p>';
                 return;
             }
 
             try {
-                // 第二步：请求JSON数据（加全容错）
+                // 读取文章数据（加时间戳防缓存）
                 const response = await fetch(`./data/articles.json?t=${Date.now()}`, { cache: 'no-cache' });
-                // 容错：请求失败
-                if (!response.ok) {
-                    throw new Error(`请求文章数据失败，状态码：${response.status}`);
-                }
+                if (!response.ok) throw new Error(`请求失败：${response.status}`);
 
                 const data = await response.json();
-                // 容错：data不是对象 / data.articles不是数组
+                // 确保articles是数组（容错）
                 const articles = Array.isArray(data?.articles) ? data.articles : [];
+                // 查找对应ID的文章
                 const article = articles.find(art => art?.id === articleId);
 
-                // 容错：文章不存在
+                // 文章不存在则提示
                 if (!article) {
-                    contentContainer.innerHTML = '<p class="error">文章不存在</p>';
+                    contentBox.innerHTML = '<p class="error">文章不存在</p>';
                     return;
                 }
 
-                // 第三步：格式化数据（全字段容错）
-                // 时间格式化容错
+                // 格式化时间（容错，避免日期格式错报错）
                 let createTime = '未知时间';
                 try {
                     createTime = article.createTime ? new Date(article.createTime).toLocaleString() : '未知时间';
@@ -143,66 +144,55 @@
                     createTime = '时间格式错误';
                 }
 
-                let updateTime = createTime;
+                // Markdown转HTML（仅基础功能，无报错扩展）
+                let articleContent = '无内容';
                 try {
-                    updateTime = article.updateTime ? new Date(article.updateTime).toLocaleString() : createTime;
-                } catch (e) {
-                    updateTime = '时间格式错误';
-                }
-
-                // Markdown转HTML容错
-                let contentHtml = '无内容';
-                try {
-                    const converter = new showdown.Converter({
-                        extensions: ['table', 'strikethrough', 'superscript', 'subscript'],
-                        noHeaderId: true,
-                        ghCodeBlocks: true,
-                        smoothLivePreview: true,
-                        backslashEscapesHTMLTags: false,
-                        literalMidWordUnderscores: true
+                    const mdConverter = new showdown.Converter({
+                        noHeaderId: true,        // 不给标题加ID，避免样式乱
+                        ghCodeBlocks: true,      // 支持GitHub风格```代码块
+                        smoothLivePreview: true, // 转HTML更顺滑
+                        literalMidWordUnderscores: true // 保留公式里的下划线
                     });
-                    contentHtml = converter.makeHtml(article.content || '');
+                    articleContent = mdConverter.makeHtml(article.content || '');
                 } catch (e) {
-                    contentHtml = `<p class="error">内容解析失败：${e.message}</p>`;
+                    articleContent = `<p class="error">内容解析失败：${e.message}</p>`;
                 }
 
-                // 标签渲染容错
+                // 渲染标签（容错，避免tags不是数组报错）
                 const tagsHtml = (article.tags && Array.isArray(article.tags)) 
                     ? article.tags.map(tag => `<span class="tag">${tag || ''}</span>`).join('') 
                     : '';
 
-                // 第四步：拼接HTML并渲染
-                contentContainer.innerHTML = `
+                // 拼接最终HTML（极简结构）
+                contentBox.innerHTML = `
                     <div class="article-header">
                         <h1>${article.title || '无标题'}</h1>
                         <div class="article-meta">
                             <span><i class="fas fa-calendar"></i> 创建时间：${createTime}</span>
-                            ${article.updateTime ? `<span><i class="fas fa-edit"></i> 更新时间：${updateTime}</span>` : ''}
                             <div class="article-tags">${tagsHtml}</div>
                         </div>
                     </div>
                     <div class="article-summary">${article.desc || '无摘要'}</div>
-                    <div class="article-content" id="article-content">${contentHtml}</div>
+                    <div class="article-content">${articleContent}</div>
                 `;
 
-                // 第五步：激活代码高亮+公式渲染（延迟+容错）
+                // 激活代码高亮和公式渲染（延迟执行，确保HTML已渲染）
                 setTimeout(() => {
-                    try { Prism.highlightAll(); } catch (e) { console.log('代码高亮激活失败：', e); }
-                    try { MathJax.typeset(); } catch (e) { console.log('公式渲染激活失败：', e); }
+                    try { Prism.highlightAll(); } catch (e) {} // 代码高亮（失败不影响）
+                    try { MathJax.typeset(); } catch (e) {}     // 公式渲染（失败不影响）
                 }, 300);
 
             } catch (err) {
-                // 最终兜底：捕获所有异常
-                contentContainer.innerHTML = `<p class="error">加载失败：${err.message} <button onclick="loadArticleDetail()">重试</button></p>`;
-                console.error('文章详情加载错误：', err);
+                // 所有错误兜底，显示重试按钮
+                contentBox.innerHTML = `<p class="error">加载失败：${err.message} <button onclick="loadArticleDetail()">重试</button></p>`;
             }
         }
 
-        // ========== 3. 页面初始化（关键！DOM加载完成后执行） ==========
+        // ===================== 3. 页面初始化（DOM加载完成后执行） =====================
         document.addEventListener('DOMContentLoaded', () => {
             // 初始化暗色模式
             initTheme();
-            // 绑定暗色模式切换事件（容错）
+            // 绑定暗色模式切换按钮
             const themeBtn = document.getElementById('themeToggle');
             if (themeBtn) {
                 themeBtn.addEventListener('click', toggleTheme);
@@ -216,7 +206,7 @@
                 });
             }
 
-            // 核心：DOM加载完成后才加载文章详情
+            // 加载文章详情（核心！）
             loadArticleDetail();
         });
     </script>
